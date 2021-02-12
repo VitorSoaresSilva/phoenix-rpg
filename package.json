@@ -1,0 +1,19 @@
+{
+  "name": "phoenix-rpg",
+  "version": "1.0.0",
+  "main": "server.js",
+  "repository": "https://github.com/VitorSoaresSilva/phoenix-rpg.git",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "socket.io": "^3.1.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  },
+  "scripts": {
+    "server": "nodemon -e html,js Server/server.js",
+    "client": "npx live-server Client/"
+  }
+}
