@@ -29,6 +29,8 @@ io.on('connection', client => {
     client.on('joinRoom', handleJoinRoom);
     client.on('ready',playerReady);
     client.on('tryCreatePlayer',tryCreatePlayer);
+    client.on('keydown',handleKeyDown);
+    client.on('keyup',handleKeyUp);
 
     function handleConnectToRoom(roomName) {
         client.join(roomName)
@@ -132,13 +134,12 @@ io.on('connection', client => {
     }
     function isValidPosition(pos){
         let arrPlayers = getPlayersInRoom(myRoom);
-        arrPlayers.map(player=>{
-            if(pos.x === player.pos.x && pos.y === player.pos.y){
-                return false
-                // return {obstaculo: player}
-            }
-        })
-        return true;
+        let ret = true;
+        ret = !arrPlayers.some(player => pos.x === player.pos.x && pos.y === player.pos.y)
+        if(pos.x >= GRID_SIZE || pos.y >= GRID_SIZE || pos.x < 0 || pos.y < 0){
+            ret = false
+        }
+        return ret;
     }
     function playerReady(){ // funciona mas vou mudar
         let myPlayer = getPlayer();
@@ -150,8 +151,97 @@ io.on('connection', client => {
             let room = getRoomByName(myRoom);
             room.gameState = roomState.running;
             io.in(myRoom).emit("gameStart",room);
+            gameStart();
         }else{
             io.in(myRoom).emit('lobby',playersInRoom);
+        }
+    }
+    let intervalId = null;
+    function stopGame(){
+        clearInterval(intervalId);
+        io.in(myRoom).emit("gamePaused");
+    }
+    function gameStart(){
+        intervalId = setInterval(() => {
+                gameLoop(); 
+                io.in(myRoom).emit("state",{players: getPlayersInRoom(myRoom),room: getRoomByName(myRoom)});
+        }, 1000 / FRAME_RATE);
+    }
+    function gameLoop(){
+        let playersInRoom = getPlayersInRoom(myRoom);
+        playersInRoom.map(player =>{
+            if(player.vel.x != 0 || player.vel.y != 0){
+                let newPos = {
+                    x: player.pos.x + player.vel.x,
+                    y: player.pos.y + player.vel.y
+                }
+                if(isValidPosition(newPos)){
+                    player.pos = newPos;
+                }
+            }
+        })
+    }
+    function handleKeyDown(keycode) {
+        let player = getPlayer();
+        let newPos = {x:0,y:0}
+        switch (keycode) {
+            case 27:
+                break;
+        case 37: { //left
+            player.vel = {
+                x: player.vel.x + (-1), y: player.vel.y
+            }
+            break;
+        }
+        case 38: { //down
+            player.vel = {
+                x:player.vel.x, y: player.vel.y + (-1)
+            }
+            break;
+        }
+        case 39: { //rigth
+            player.vel = {
+                x:player.vel.x + (1), y: player.vel.y
+            }
+            break;
+        }
+        case 40: { //up
+            player.vel = {
+                x:player.vel.x, y: player.vel.y + (1)
+            }
+            break;
+        }
+    }
+}
+    function handleKeyUp(keycode) {
+        let player = getPlayer();
+        switch (keycode) {
+            case 27:
+                break;
+            case 37: { //left
+                player.vel = {
+                    x: player.vel.x - (-1), y: player.vel.y
+                }
+                break;
+            }
+            case 38: { //down
+                player.vel = {
+                    x:player.vel.x, y: player.vel.y - (-1)
+                }
+                break;
+            }
+            case 39: { //rigth
+                player.vel = {
+                    x:player.vel.x - (1), y: player.vel.y
+                }
+                break;
+            }
+            case 40: { //up
+                player.vel = {
+                    x:player.vel.x, y: player.vel.y - (1)
+                }
+                break;
+            }
         }
     }
 
@@ -166,11 +256,13 @@ io.on('connection', client => {
             //verifico se a sala ficou vazia
             if (getPlayersInRoom(roomName).length === 0) {
                 rooms = rooms.filter(room => room.name !== roomName);
+                stopGame()
                 updateRooms();
             }
         }else if(myRoom){
             if (getPlayersInRoom(myRoom).length === 0) {
                 rooms = rooms.filter(room => room.name !== myRoom);
+                stopGame()
                 updateRooms();
             }
 

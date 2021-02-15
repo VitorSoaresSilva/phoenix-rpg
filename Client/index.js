@@ -18,6 +18,8 @@ const createCharForm = document.getElementById('createCharForm');
 btnNewGame.addEventListener('click',()=>socket.emit('newRoom'))
 btnCreateChar.addEventListener('click',formCreateChar)
 btnReady.addEventListener('click',changeReady)
+const PLAYER_COLOR = '#00ff00';
+const OTHER_PLAYER_COLOR = '#ff0000';
 
 let canvas,ctx;
 socket.emit('getRoomNames')
@@ -27,7 +29,8 @@ socket.on('unknownGame',unknownGame);
 socket.on('lobby',lobby);
 socket.on('invalidPlayer',invalidPlayer);
 socket.on('gameStart',gameStart);
-
+socket.on('state',state);
+let removeListener = null;
 // código encontrado no https://stackoverflow.com/a/60715758/15208728
 const onKeyPress = (onPress,onRelease, target = window) => {
     // persistent "store" to track what keys are being pressed
@@ -58,26 +61,46 @@ const onKeyPress = (onPress,onRelease, target = window) => {
         window.removeEventListener('keyup', onKeyUp);
     };
 };
-const removeListener = onKeyPress(keydown,keyup); // adiciona a função
+// const removeListener = onKeyPress(keydown,keyup); // adiciona a função
 // removeListener(); // remove
 
 function keydown(e){
+    socket.emit('keydown',e.keyCode)
     console.log('apertei ', e.keyCode, e.key)
     //emit
 }
 function keyup(e){
+    socket.emit('keyup',e.keyCode)
     console.log('soltei',e.keyCode)
     //emit
 }
-
-function gameStart(roomData){
-    changeActiveScreen(homeOuterContainer);
+function state(data){
+    console.log(data)
+    renderScreen(data.room);
+    renderPlayers(data.players,data.room.size);
+}
+function renderPlayers(players,size){
+    players.map((player)=>{
+        if(player.id == socket.id){
+            ctx.fillStyle = PLAYER_COLOR;
+        }else{
+            ctx.fillStyle = OTHER_PLAYER_COLOR;
+        }
+        ctx.fillRect(player.pos.x * size, player.pos.y * size, size , size )
+    })
+}
+function renderScreen(roomData){
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
     canvas.width = canvas.height = roomData.canvasSize;
     ctx.fillStyle = roomData.canvasColor;
     ctx.fillRect(0,0,canvas.width,canvas.height)
+}
 
+function gameStart(roomData){
+    changeActiveScreen(homeOuterContainer);
+    renderScreen(roomData);
+    removeListener = onKeyPress(keydown,keyup); // adiciona a função
 }
 function changeActiveScreen(screen){
     createCharContainer.style.display = 'none';
@@ -105,15 +128,17 @@ function changeReady(){
 }
 
 function lobby(playersData){
-    changeActiveScreen(lobbyContainer)
-    tablePlayersInLobby.innerHTML = '';
-    playersData.map( player => {
-        var row = tablePlayersInLobby.insertRow(0)
-        var cell1 = row.insertCell(0)
-        var cell2 = row.insertCell(1)
-        cell1.innerHTML = player.name;
-        cell2.innerHTML = player.ready;
-    })
+    if(playersData.filter(player => player.id === socket.id).length > 0){
+        changeActiveScreen(lobbyContainer)
+        tablePlayersInLobby.innerHTML = '';
+        playersData.map( player => {
+            var row = tablePlayersInLobby.insertRow(0)
+            var cell1 = row.insertCell(0)
+            var cell2 = row.insertCell(1)
+            cell1.innerHTML = player.name;
+            cell2.innerHTML = player.ready;
+        })
+    }
 }
 
 function receiveRoomData(roomData){
