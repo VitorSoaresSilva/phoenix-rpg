@@ -22,3 +22,17 @@ body{
     align-items: center;
     flex-direction: column;
 }
+#createCharContainer{
+    display: none;
+    background: #004519;
+    justify-content: center;
+    align-items: center;
+    flex:1;
+}
+#lobbyContainer{
+    display: none;
+    background: #aa4519;
+    justify-content: center;
+    align-items: center;
+    flex:1;
+}

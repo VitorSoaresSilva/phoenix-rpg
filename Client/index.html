@@ -3,18 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel="stylesheet" href="index.css">
     <title>Document</title>
 </head>
 <body>
     <div id="loginOuterContainer">
-        hello
+        <h1>Phoenix Game</h1>
         <button type="button" id="btnNewGame">New Game</button>
         <table>
             <thead>
                 <tr>
                     <th>Nome</th>
-                    <th>button</th>
+                    <th>______</th>
                 </tr>
             </thead>
             <tbody id="tableRoomNames"></tbody>
@@ -22,7 +23,25 @@
     </div>
     <div id="homeOuterContainer">
         <canvas id="canvas"></canvas>
-        <button type="button" id="btnGetData">get</button>
+    </div>
+    <div id="createCharContainer">
+        <form id="createCharForm">
+            <input type="text" placeholder="Name" name="name" required> 
+        </form>
+        <button type="button" id="btnCreateChar">Enviar</button>
+    </div>
+    <div id="lobbyContainer">
+        <h2>Lobby</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Pronto?</th>
+                </tr>
+            </thead>
+            <tbody id="tablePlayersInLobby"></tbody>
+        </table>
+        <button id="btnReady" class="btn btn-success" value="pronto">Pronto</button>
     </div>
     <script src="https://cdn.socket.io/3.1.1/socket.io.js"></script>
     <script src="index.js"></script>

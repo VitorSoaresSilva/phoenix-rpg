@@ -14,6 +14,11 @@ io.listen(PORT, () => {
 
 let rooms = [];
 let players = [];
+let roomState = {
+    running: 'running',
+    paused: 'paused',
+    lobby: 'lobby'
+};
 
 io.on('connection', client => {
     let myRoom = '';
@@ -22,14 +27,25 @@ io.on('connection', client => {
     client.on('newRoom', handleNewRoom);
     client.on('getRoomNames', handleGetRooms);
     client.on('joinRoom', handleJoinRoom);
+    client.on('ready',playerReady);
+    client.on('tryCreatePlayer',tryCreatePlayer);
 
     function handleConnectToRoom(roomName) {
         client.join(roomName)
         myRoom = roomName;
         let room = getRoomByName(myRoom)
         client.emit('roomData', room)
-        // console.log('myrom',myRoom)
-        client.emit('newPlayer', createNewPlayer(myRoom));
+    }
+    function tryCreatePlayer(playerData){
+        let playersInRoom = getPlayersInRoom(myRoom);
+        let playerWithSameName = playersInRoom.filter(player => player.name === playerData.name)
+        if(playerWithSameName.length > 0){
+            client.emit('invalidPlayer', 'Nome já foi escolhido');
+        }else{
+            let player = createNewPlayer(playerData);
+            playersInRoom.push(player)
+            io.in(myRoom).emit('lobby',playersInRoom);
+        }
     }
 
     function handleNewRoom() {
@@ -47,7 +63,8 @@ io.on('connection', client => {
             canvasSize: CANVAS_SIZE,
             size: CANVAS_SIZE/GRID_SIZE,
             canvasColor: '#004545',
-            curLevel: 1
+            curLevel: 1,
+            gameState: roomState.lobby,
         }
         //adiciona a room à lista
         rooms.push(newRoom);
@@ -72,16 +89,18 @@ io.on('connection', client => {
 
     function updateRooms() {
         const allRoomNames = rooms.map(room => room.name)
-        client.broadcast.emit('roomNames', allRoomNames);
+        io.emit('roomNames', allRoomNames);
     }
 
-    function createNewPlayer(roomName) {
+    function createNewPlayer(playerData) {
         const newPlayer = {
             id: client.id,
             pos: getRandomPosition(),
             vel: {x: 0,y: 0},
             rot: {x: 0,y: 0},
-            room: roomName
+            room: myRoom,
+            ready: false,
+            name: playerData.name
         }
         players.push(newPlayer);
         return newPlayer;
@@ -121,7 +140,20 @@ io.on('connection', client => {
         })
         return true;
     }
-
+    function playerReady(){ // funciona mas vou mudar
+        let myPlayer = getPlayer();
+        let playersInRoom = getPlayersInRoom(myRoom);
+        myPlayer.ready = !myPlayer.ready;
+        let amountPlayersReady = 0;
+        playersInRoom.map(player => amountPlayersReady += player.ready)
+        if(amountPlayersReady === playersInRoom.length){
+            let room = getRoomByName(myRoom);
+            room.gameState = roomState.running;
+            io.in(myRoom).emit("gameStart",room);
+        }else{
+            io.in(myRoom).emit('lobby',playersInRoom);
+        }
+    }
 
     client.on('disconnect', () => {
         let player = getPlayer()
@@ -136,6 +168,12 @@ io.on('connection', client => {
                 rooms = rooms.filter(room => room.name !== roomName);
                 updateRooms();
             }
+        }else if(myRoom){
+            if (getPlayersInRoom(myRoom).length === 0) {
+                rooms = rooms.filter(room => room.name !== myRoom);
+                updateRooms();
+            }
+
         }
     })
 })
