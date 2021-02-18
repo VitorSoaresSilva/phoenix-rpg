@@ -20,8 +20,11 @@ btnCreateChar.addEventListener('click',formCreateChar)
 btnReady.addEventListener('click',changeReady)
 const PLAYER_COLOR = '#00ff00';
 const OTHER_PLAYER_COLOR = '#ff0000';
-
+let maps = [];
 let canvas,ctx;
+canvas = document.getElementById('canvas');
+ctx = canvas.getContext('2d'); 
+
 socket.emit('getRoomNames')
 socket.on('roomData',receiveRoomData);
 socket.on('roomNames',receiveRoomNames);
@@ -90,11 +93,16 @@ function renderPlayers(players,size){
     })
 }
 function renderScreen(roomData){
-    canvas = document.getElementById('canvas');
-    ctx = canvas.getContext('2d');
     canvas.width = canvas.height = roomData.canvasSize;
     ctx.fillStyle = roomData.canvasColor;
     ctx.fillRect(0,0,canvas.width,canvas.height)
+    if(maps){
+        maps.map((map)=>{
+            let size = 10;
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(map.x * size, map.y * size, size , size )
+        })
+    }
 }
 
 function gameStart(roomData){
@@ -140,8 +148,8 @@ function lobby(playersData){
         })
     }
 }
-
-function receiveRoomData(roomData){
+function receiveRoomData(roomData,map){
+    maps = map;
     if(roomData.gameState === 'lobby'){
         changeActiveScreen(createCharContainer);
     }else if(roomData.gameState === 'running'){
