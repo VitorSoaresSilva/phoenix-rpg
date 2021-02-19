@@ -7,7 +7,7 @@ const io = require('socket.io')(http, {
 })
 const {makeId} = require('./utils')
 const {GRID_SIZE, CANVAS_SIZE, FRAME_RATE} = require('./constants')
-const {maps} = require('./maps')
+const {maps,nMaps} = require('./maps')
 io.listen(PORT, () => {
     console.log(`Server running on ${PORT}`)
 })
@@ -36,7 +36,7 @@ io.on('connection', client => {
         client.join(roomName)
         myRoom = roomName;
         let room = getRoomByName(myRoom)
-        client.emit('roomData', room,maps[room.curLevel])
+        client.emit('roomData', room,nMaps)
     }
     function tryCreatePlayer(playerData){
         let playersInRoom = getPlayersInRoom(myRoom);
@@ -144,14 +144,11 @@ io.on('connection', client => {
 
         isCollidingWithOutside = (pos.x >= GRID_SIZE || pos.y >= GRID_SIZE || pos.x < 0 || pos.y < 0);
 
-        isCollingWithWall = maps[0].some(map => pos.x === map.x && pos.y === map.y)
+        isCollingWithWall = nMaps[pos.y][pos.x];
 
-        let wallDiagonal1 = {x: pos.x,y: curPos.y};
-        let wallDiagonal2 = {x: curPos.x,y: pos.y};
-        let diagonal1 = maps[0].some(map =>  map.x === wallDiagonal1.x && map.y === wallDiagonal1.y)
-        let diagonal2 = maps[0].some(map =>  map.x === wallDiagonal2.x && map.y === wallDiagonal2.y)
-        isDiagonalWall = (diagonal1 && diagonal2);
-
+        if(curPos.x > -1){
+            isDiagonalWall = (nMaps[pos.y][curPos.x] && nMaps[curPos.y][pos.x]);
+        }
         return (!isCollidingWithPlayer && !isCollidingWithOutside && !isCollingWithWall && !(isDiagonalWall));
     }
     function playerReady(){ // funciona mas vou mudar

@@ -69,16 +69,13 @@ const onKeyPress = (onPress,onRelease, target = window) => {
 
 function keydown(e){
     socket.emit('keydown',e.keyCode)
-    console.log('apertei ', e.keyCode, e.key)
     //emit
 }
 function keyup(e){
     socket.emit('keyup',e.keyCode)
-    console.log('soltei',e.keyCode)
     //emit
 }
 function state(data){
-    console.log(data)
     renderScreen(data.room);
     renderPlayers(data.players,data.room.size);
 }
@@ -95,13 +92,18 @@ function renderPlayers(players,size){
 function renderScreen(roomData){
     canvas.width = canvas.height = roomData.canvasSize;
     ctx.fillStyle = roomData.canvasColor;
-    ctx.fillRect(0,0,canvas.width,canvas.height)
-    if(maps){
-        maps.map((map)=>{
-            let size = 10;
-            ctx.fillStyle = '#fff';
-            ctx.fillRect(map.x * size, map.y * size, size , size )
-        })
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    for(let i = 0; i < maps.length; i++){
+        for(let j = 0; j < maps[i].length; j++){
+            if(maps[i][j] == 1){
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(j * roomData.size, i * roomData.size, roomData.size , roomData.size )
+            }else if(maps[i][j] == 2){
+                ctx.fillStyle = '#454500';
+                ctx.fillRect(j * roomData.size, i * roomData.size, roomData.size , roomData.size )
+            }
+        }
     }
 }
 
@@ -121,7 +123,6 @@ function changeActiveScreen(screen){
 
 
 function changeReady(){
-    console.log(btnReady.value);
     if(btnReady.value === 'pronto'){
         btnReady.value = 'cancelar';
         btnReady.innerHTML = 'Cancelar';
