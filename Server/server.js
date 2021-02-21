@@ -36,7 +36,8 @@ io.on('connection', client => {
         client.join(roomName)
         myRoom = roomName;
         let room = getRoomByName(myRoom)
-        client.emit('roomData', room,nMaps)
+        let map = createMap()
+        client.emit('roomData', room,map)
     }
     function tryCreatePlayer(playerData){
         let playersInRoom = getPlayersInRoom(myRoom);
@@ -253,6 +254,20 @@ io.on('connection', client => {
                 break;
             }
         }
+    }
+    function createMap(){
+        let map = {wall: [], gate:[]};
+        for(let i = 0; i < nMaps.length; i++){
+            for(let j = 0; j < nMaps[i].length; j++){
+                if(nMaps[i][j] === 1){
+                    map.wall.push({x:j, y:i})
+                }
+                else if(nMaps[i][j] === 2){
+                    map.gate.push({x:j, y:i})
+                }
+            }
+        }
+        return map;
     }
 
     client.on('disconnect', () => {

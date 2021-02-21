@@ -20,7 +20,7 @@ btnCreateChar.addEventListener('click',formCreateChar)
 btnReady.addEventListener('click',changeReady)
 const PLAYER_COLOR = '#00ff00';
 const OTHER_PLAYER_COLOR = '#ff0000';
-let maps = [];
+let maps = {};
 let canvas,ctx;
 canvas = document.getElementById('canvas');
 ctx = canvas.getContext('2d'); 
@@ -94,17 +94,15 @@ function renderScreen(roomData){
     ctx.fillStyle = roomData.canvasColor;
     ctx.fillRect(0,0,canvas.width,canvas.height);
 
-    for(let i = 0; i < maps.length; i++){
-        for(let j = 0; j < maps[i].length; j++){
-            if(maps[i][j] == 1){
-                ctx.fillStyle = '#fff';
-                ctx.fillRect(j * roomData.size, i * roomData.size, roomData.size , roomData.size )
-            }else if(maps[i][j] == 2){
-                ctx.fillStyle = '#454500';
-                ctx.fillRect(j * roomData.size, i * roomData.size, roomData.size , roomData.size )
-            }
-        }
+    for(let i = 0; i < maps.wall.length; i++){
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(maps.wall[i].x * roomData.size, maps.wall[i].y * roomData.size, roomData.size , roomData.size);
     }
+    for(let i = 0; i < maps.gate.length; i++){
+        ctx.fillStyle = '#ffff00';
+        ctx.fillRect(maps.gate[i].x * roomData.size, maps.gate[i].y * roomData.size, roomData.size , roomData.size);
+    }
+
 }
 
 function gameStart(roomData){
