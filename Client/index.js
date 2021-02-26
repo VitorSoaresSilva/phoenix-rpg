@@ -68,6 +68,7 @@ const onKeyPress = (onPress,onRelease, target = window) => {
 // removeListener(); // remove
 
 function keydown(e){
+    console.log(e.keyCode)
     socket.emit('keydown',e.keyCode)
     //emit
 }
@@ -86,7 +87,14 @@ function renderPlayers(players,size){
         }else{
             ctx.fillStyle = OTHER_PLAYER_COLOR;
         }
-        ctx.fillRect(player.pos.x * size, player.pos.y * size, size , size )
+        ctx.fillRect(player.pos.x * size, player.pos.y * size, size , size );
+        ctx.fillStyle = "#FFF";
+        ctx.fillRect(
+            (player.pos.x + (clamp(0,1,player.rot.x))) * size,
+            (player.pos.y + (clamp(0,1,player.rot.y))) * size,
+            (1 * player.rot.x) * size + 2,
+            (1 * player.rot.y) * size + 2
+        )
     })
 }
 function renderScreen(roomData){
@@ -199,4 +207,10 @@ function invalidPlayer(message){
     for (let index = 0; index < createCharForm.length; index++) {
         createCharForm[index].value = null;
     }
+}
+// code in: https://github.com/VitorSoaresSilva/bituru.js
+function clamp(min, max, x){
+    let dif1 = (max - x)
+	let dif2 = (x - min)
+    return x - (dif1 * (dif1>>31)) + (dif2 * (dif2>>31))
 }
