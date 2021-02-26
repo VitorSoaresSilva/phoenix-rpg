@@ -98,14 +98,13 @@ io.on('connection', client => {
     function createNewPlayer(playerData) {
         const newPlayer = {
             id: client.id,
-            pos: getRandomPosition(),
             vel: {x: 0,y: 0},
-            rot: {x: 0,y: 0},
-            rotLocked:false,
+            rot: {x: 0,y: 1},
             room: myRoom,
             ready: false,
             name: playerData.name
         }
+        newPlayer.pos = getRandomPosition(),
         players.push(newPlayer);
         return newPlayer;
     }
@@ -123,8 +122,6 @@ io.on('connection', client => {
     }
     function getRandomPosition() {
         let room = getRoomByName(myRoom);
-        // ver se nao tem nenhum player
-        // ver se nao tem obstaculo
         const newPos = {
             x: Math.round(Math.random() * room.gridSize),
             y: Math.round(Math.random() * room.gridSize)
@@ -188,13 +185,15 @@ io.on('connection', client => {
                 }
                 if(isValidPosition(newPos,player.pos)){
                     player.pos = newPos;
+
+
                 }
             }
         })
     }
     function handleKeyDown(keycode) {
         let player = getPlayer();
-        let newPos = {x:0,y:0}
+        let newRot = {x:0,y:0}
         switch (keycode) {
             case 27:
                 break;
@@ -202,28 +201,41 @@ io.on('connection', client => {
             player.vel = {
                 x: player.vel.x + (-1), y: player.vel.y
             }
+            newRot = { x: -1, y: 0 };
+            player.rot.x = newRot.x;
+            player.rot.y = newRot.y;
             break;
         }
         case 38: { //down
             player.vel = {
                 x:player.vel.x, y: player.vel.y + (-1)
             }
+            newRot = { x:0, y: -1};
+            player.rot.x = newRot.x;
+            player.rot.y = newRot.y;
             break;
         }
         case 39: { //rigth
             player.vel = {
                 x:player.vel.x + (1), y: player.vel.y
             }
+            newRot = { x:1, y: 0};
+            player.rot.x = newRot.x;
+            player.rot.y = newRot.y;
             break;
         }
         case 40: { //up
             player.vel = {
                 x:player.vel.x, y: player.vel.y + (1)
             }
+            newRot = {x:0, y: 1}
+            player.rot.x = newRot.x;
+            player.rot.y = newRot.y;
             break;
         }
     }
 }
+
     function handleKeyUp(keycode) {
         let player = getPlayer();
         switch (keycode) {
