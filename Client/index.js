@@ -79,6 +79,7 @@ function keyup(e){
 function state(data){
     renderScreen(data.room);
     renderPlayers(data.players,data.room.size);
+    renderBullets(data.bullets,data.room.size);
 }
 function renderPlayers(players,size){
     players.map((player)=>{
@@ -95,6 +96,12 @@ function renderPlayers(players,size){
             (1 * player.rot.x) * size + 2,
             (1 * player.rot.y) * size + 2
         )
+    })
+}
+function renderBullets(bullets,size){
+    ctx.fillStyle = '#ff8800';
+    bullets.map((bullet)=>{
+        ctx.fillRect(bullet.pos.x * size, bullet.pos.y * size, size, size)
     })
 }
 function renderScreen(roomData){

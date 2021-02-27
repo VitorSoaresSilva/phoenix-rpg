@@ -14,6 +14,7 @@ io.listen(PORT, () => {
 
 let rooms = [];
 let players = [];
+let bullets = [];
 let roomState = {
     running: 'running',
     paused: 'paused',
@@ -172,11 +173,24 @@ io.on('connection', client => {
     function gameStart(){
         intervalId = setInterval(() => {
                 gameLoop(); 
-                io.in(myRoom).emit("state",{players: getPlayersInRoom(myRoom),room: getRoomByName(myRoom)});
+                io.in(myRoom).emit("state",{players: getPlayersInRoom(myRoom),room: getRoomByName(myRoom), bullets: bullets});
         }, 1000 / FRAME_RATE);
     }
     function gameLoop(){
         let playersInRoom = getPlayersInRoom(myRoom);
+        let newArrBullets = bullets;
+        bullets.map(bullet => {
+            let newPos = {
+                x: bullet.pos.x + bullet.vel.x,
+                y: bullet.pos.y + bullet.vel.y
+            }
+            if(isValidPosition(newPos)){
+                bullet.pos = newPos;
+            }else{
+                newArrBullets = bullets.filter(b => b.id != bullet.id)
+            }
+        })
+        bullets = newArrBullets;
         playersInRoom.map(player =>{
             if(player.vel.x != 0 || player.vel.y != 0){
                 let newPos = {
@@ -185,11 +199,24 @@ io.on('connection', client => {
                 }
                 if(isValidPosition(newPos,player.pos)){
                     player.pos = newPos;
-
-
                 }
             }
         })
+    }
+    function createBullet(player){
+        const bullet = {
+            id: makeId(6),
+            vel:{
+                x:player.rot.x * 2,
+                y: player.rot.y *2
+            },
+            pos:{
+                x:player.pos.x + player.rot.x,
+                y:player.pos.y + player.rot.y
+            },
+            autorId: player.id,
+        }
+        bullets.push(bullet);
     }
     function handleKeyDown(keycode) {
         let player = getPlayer();
@@ -197,44 +224,47 @@ io.on('connection', client => {
         switch (keycode) {
             case 27:
                 break;
-        case 37: { //left
-            player.vel = {
-                x: player.vel.x + (-1), y: player.vel.y
-            }
-            newRot = { x: -1, y: 0 };
-            player.rot.x = newRot.x;
-            player.rot.y = newRot.y;
+            case 32:
+                createBullet(player);
+                    break;
+            case 37:{ //left
+                player.vel = {
+                    x: player.vel.x + (-1), y: player.vel.y
+                }
+                newRot = { x: -1, y: 0 };
+                player.rot.x = newRot.x;
+                player.rot.y = newRot.y;
             break;
-        }
-        case 38: { //down
-            player.vel = {
-                x:player.vel.x, y: player.vel.y + (-1)
             }
-            newRot = { x:0, y: -1};
-            player.rot.x = newRot.x;
-            player.rot.y = newRot.y;
-            break;
-        }
-        case 39: { //rigth
-            player.vel = {
-                x:player.vel.x + (1), y: player.vel.y
+            case 38: { //down
+                player.vel = {
+                    x:player.vel.x, y: player.vel.y + (-1)
+                }
+                newRot = { x:0, y: -1};
+                player.rot.x = newRot.x;
+                player.rot.y = newRot.y;
+                break;
             }
-            newRot = { x:1, y: 0};
-            player.rot.x = newRot.x;
-            player.rot.y = newRot.y;
-            break;
-        }
-        case 40: { //up
-            player.vel = {
-                x:player.vel.x, y: player.vel.y + (1)
+            case 39: { //rigth
+                player.vel = {
+                    x:player.vel.x + (1), y: player.vel.y
+                }
+                newRot = { x:1, y: 0};
+                player.rot.x = newRot.x;
+                player.rot.y = newRot.y;
+                break;
             }
-            newRot = {x:0, y: 1}
-            player.rot.x = newRot.x;
-            player.rot.y = newRot.y;
-            break;
+            case 40: { //up
+                player.vel = {
+                    x:player.vel.x, y: player.vel.y + (1)
+                }
+                newRot = {x:0, y: 1}
+                player.rot.x = newRot.x;
+                player.rot.y = newRot.y;
+                break;
+            }
         }
     }
-}
 
     function handleKeyUp(keycode) {
         let player = getPlayer();
