@@ -8,42 +8,14 @@
     <title>Document</title>
 </head>
 <body>
-    <div id="loginOuterContainer">
-        <h1>Phoenix Game</h1>
-        <button type="button" id="btnNewGame">New Game</button>
-        <table>
-            <thead>
-                <tr>
-                    <th>Nome</th>
-                    <th>______</th>
-                </tr>
-            </thead>
-            <tbody id="tableRoomNames"></tbody>
-        </table>
+    <div id="mainContainer" class="container">
+        <h1>Client</h1>
+        <p>Aguardando resposta do servidor...</p>
     </div>
-    <div id="homeOuterContainer">
-        <canvas id="canvas"></canvas>
-    </div>
-    <div id="createCharContainer">
-        <form id="createCharForm">
-            <input type="text" placeholder="Name" name="name" required> 
-        </form>
-        <button type="button" id="btnCreateChar">Enviar</button>
-    </div>
-    <div id="lobbyContainer">
-        <h2>Lobby</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Nome</th>
-                    <th>Pronto?</th>
-                </tr>
-            </thead>
-            <tbody id="tablePlayersInLobby"></tbody>
-        </table>
-        <button id="btnReady" class="btn btn-success" value="pronto">Pronto</button>
-    </div>
+
+
+    <script type="text/javascript" src="libs/mustache.js"></script>
     <script src="https://cdn.socket.io/3.1.1/socket.io.js"></script>
-    <script src="index.js"></script>
+    <script type="module" src="client.js"></script>
 </body>
 </html>

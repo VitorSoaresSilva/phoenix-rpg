@@ -15,9 +15,9 @@ const btnReady = document.getElementById('btnReady');
 
 const createCharForm = document.getElementById('createCharForm');
 
-btnNewGame.addEventListener('click',()=>socket.emit('newRoom'))
-btnCreateChar.addEventListener('click',formCreateChar)
-btnReady.addEventListener('click',changeReady)
+// btnNewGame.addEventListener('click',()=>socket.emit('newRoom'))
+// btnCreateChar.addEventListener('click',formCreateChar)
+// btnReady.addEventListener('click',changeReady)
 const PLAYER_COLOR = '#00ff00';
 const OTHER_PLAYER_COLOR = '#ff0000';
 let maps = {};
@@ -33,6 +33,7 @@ socket.on('lobby',lobby);
 socket.on('invalidPlayer',invalidPlayer);
 socket.on('gameStart',gameStart);
 socket.on('state',state);
+socket.on('init',init)
 let removeListener = null;
 // código encontrado no https://stackoverflow.com/a/60715758/15208728
 const onKeyPress = (onPress,onRelease, target = window) => {
@@ -82,7 +83,7 @@ function state(data){
     renderBullets(data.bullets,data.room.size);
 }
 function renderPlayers(players,size){
-    players.map((player)=>{
+    players.forEach((player)=>{
         if(player.id == socket.id){
             ctx.fillStyle = PLAYER_COLOR;
         }else{
@@ -100,9 +101,9 @@ function renderPlayers(players,size){
 }
 function renderBullets(bullets,size){
     ctx.fillStyle = '#ff8800';
-    bullets.map((bullet)=>{
+    bullets.forEach((bullet)=>{
         ctx.fillRect(bullet.pos.x * size, bullet.pos.y * size, size, size)
-    })
+    });
 }
 function renderScreen(roomData){
     canvas.width = canvas.height = roomData.canvasSize;
@@ -153,7 +154,7 @@ function lobby(playersData){
     if(playersData.filter(player => player.id === socket.id).length > 0){
         changeActiveScreen(lobbyContainer)
         tablePlayersInLobby.innerHTML = '';
-        playersData.map( player => {
+        playersData.forEach( player => {
             var row = tablePlayersInLobby.insertRow(0)
             var cell1 = row.insertCell(0)
             var cell2 = row.insertCell(1)
@@ -180,7 +181,7 @@ function receiveRoomData(roomData,map){
 function receiveRoomNames(roomNames){
     if(getComputedStyle(loginOuterContainer).display === 'flex'){
         tableRoomNames.innerHTML = '';
-        roomNames.map( name => {
+        roomNames.forEach( name => {
             var btn = document.createElement('button');
             btn.setAttribute('type', 'button');
             btn.setAttribute('class','btn btn-info');
@@ -220,4 +221,13 @@ function clamp(min, max, x){
     let dif1 = (max - x)
 	let dif2 = (x - min)
     return x - (dif1 * (dif1>>31)) + (dif2 * (dif2>>31))
+}
+
+function init(){
+    var template = document.getElementById("loginTemplate").innerHTML;
+    var rendered = Mustache.render(template);
+    changeTemplate(rendered);
+}
+function changeTemplate(template){
+    document.getElementById("mainTemplate").innerHTML = template;
 }
