@@ -5,3 +5,25 @@
     class="btn btn-primary">
         New Game
 </button>
+<table>
+    <thead>
+        <tr>
+            <th>
+                Nome da sala
+            </th>
+            <th>
+                Ações
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#names}}
+            <tr>
+                <td>{{.}}</td>
+                <td>
+                    <button>Join</button>
+                </td>
+            </tr>
+        {{/names}}
+    </tbody>
+</table>

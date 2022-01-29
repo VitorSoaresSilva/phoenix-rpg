@@ -19,6 +19,7 @@ io.on('connection', client => {
     console.log('New Connection!')
     client.emit('init','Hello from server')
     client.on('newRoom',handleNewRoom)
+    updateRooms();
 
     function handleNewRoom(){
         console.log("handle new room")
