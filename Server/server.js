@@ -32,6 +32,7 @@ io.on('connection', client => {
     client.join("lobby")
     client.emit('init','Hello from server')
     client.on('newRoom',handleNewRoom)
+    client.on('newPlayer',handleNewPlayer)
     updateRooms();
     
     function handleNewRoom(){
@@ -58,17 +59,39 @@ io.on('connection', client => {
     function handleConnectToRoom(roomName){
         client.leave("lobby")
         addPlayerToRoom(roomName,client.id);
-        client.emit('roomData',rooms.get(roomName),createMap());
+        client.emit('roomData',rooms.get(roomName));
+    }
+    function handleNewPlayer(data){
+        let player = players.get(client.id)
+        let room = rooms.get(player.roomName)
+        let canUseName = true;
+        
+        if(!data.name || !data.name.length > 0){
+            client.emit('invalidCharacter',room,[{message:'Name invalid'}]);
+            return;
+        }
+        for(let i = 0; i< room.players.length; i++){
+            if(players.get(room.players[i]).character.name == data.name){
+                canUseName = false;
+                client.emit('invalidCharacter',room,[{message:'Name already in use'}]);
+                return;
+            }
+        }
+        player.character = {name: data.name}
+        client.emit("characterCreated")
     }
     function addPlayerToRoom(roomName, socketId){
         let room = rooms.get(roomName)
+        if(!room) return;
         room.players.push(socketId)
         rooms.set(roomName,room)
         players.set(socketId,{roomName:roomName,character:{}})
         client.join("preRoom_" + roomName);
     }
     function removePlayerFromRoom(socketId){
-        let roomName = players.get(socketId).roomName;
+        let player = players.get(socketId)
+        if(!player) return;
+        let roomName = player.roomName;
         let room = rooms.get(roomName)
         for (let index = 0; index < room.players.length; index++) {
             if(room.players[index] == socketId){

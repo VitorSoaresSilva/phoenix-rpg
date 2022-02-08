@@ -1,22 +1,26 @@
 export const socket = io.connect("http://localhost:3000/")
-import { RenderLoginPage,RenderCreateCharPage } from './render.js';
+import { RenderLoginPage,RenderCreateCharPage, RenderGamePage } from './render.js';
 
 
 socket.on('init', init)
 socket.on('roomData',handleReceiveRoom)
 socket.on('roomNames',handleReceiveRoomNames)
+socket.on('invalidCharacter',handleReceiveRoom)
+socket.on('characterCreated',handleCharacterCreated)
 
 function init(message){
     console.log(message)
     RenderLoginPage()
 }
-function handleReceiveRoom(data,map){
-    console.log(data,map)
-    RenderCreateCharPage(data.name)
+function handleReceiveRoom(data,errors = []){
+    RenderCreateCharPage(data.name,errors)
 }
 function handleReceiveRoomNames(data){
     console.log(data)
     RenderLoginPage(data)
+}
+function handleCharacterCreated(){
+    RenderGamePage()
 }
 export function getFormData(e,idForm){
     e.preventDefault();
@@ -29,4 +33,7 @@ export function getFormData(e,idForm){
         }
     }
     return obj
+}
+export function sendCharacter(data){
+    socket.emit('newPlayer',data)
 }

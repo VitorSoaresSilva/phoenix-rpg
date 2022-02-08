@@ -1,4 +1,4 @@
-import { getFormData, socket } from "./client.js";
+import { getFormData, sendCharacter, socket } from "./client.js";
 
 export function RenderLoginPage(data = []) {
     fetch('./templates/login.mustache')
@@ -9,13 +9,21 @@ export function RenderLoginPage(data = []) {
         document.getElementById('btnNewGame').addEventListener('click',()=>socket.emit('newRoom'))
     });
 }
-export function RenderCreateCharPage(data) {
+export function RenderCreateCharPage(data,errors) {
     fetch('./templates/createChar.mustache')
         .then((response) => response.text())
         .then((template) => {
-        var rendered = Mustache.render(template,{roomName:data});
+        var rendered = Mustache.render(template,{roomName:data,errors: errors});
         document.getElementById('mainContainer').innerHTML = rendered;    
-        document.getElementById('formCreateChar').addEventListener('submit',(e)=>console.log(getFormData(e,"formCreateChar")))
+        document.getElementById('formCreateChar').addEventListener('submit',(e)=>sendCharacter(getFormData(e,"formCreateChar")))
+    });
+}
+export function RenderGamePage() {
+    fetch('./templates/game.mustache')
+        .then((response) => response.text())
+        .then((template) => {
+        var rendered = Mustache.render(template);
+        document.getElementById('mainContainer').innerHTML = rendered;    
     });
 }
 
