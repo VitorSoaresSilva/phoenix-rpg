@@ -18,10 +18,11 @@ let players = new Map()
 
 io.on('connection', client => {
     console.log('New Connection!')
+    client.join("lobby")
     client.emit('init','Hello from server')
     client.on('newRoom',handleNewRoom)
     updateRooms();
-
+    
     function handleNewRoom(){
         console.log("handle new room")
         const name = makeId(5);
@@ -36,15 +37,15 @@ io.on('connection', client => {
             players: []
         };
         rooms.set(name,newRoom)
-        updateRooms()
         handleConnectToRoom(name)
+        updateRooms()
     }
     function updateRooms(){
-        
         const allRoomNames = Array.from(rooms.keys())
-        io.emit('roomNames',allRoomNames)
+        io.to("lobby").emit('roomNames',allRoomNames)
     }
     function handleConnectToRoom(roomName){
+        client.leave("lobby")
         client.join(roomName);
         let map = createMap();
         client.emit('roomData',rooms.get(roomName),map);
@@ -68,17 +69,6 @@ io.on('connection', client => {
         //disconnect; remove empty room
     })
 })
-/**
-    {
-        name: "",
-        game: "",
-        status: ""
-        players: []
-    }
-
-
-
- */
 
 
 
