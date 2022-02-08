@@ -13,7 +13,18 @@ io.listen(PORT, ()=> {
 })
 
 // Data
+/** Rooms
+ * name: string(5),
+ * gridSize: number,
+ * canvasSize: number,
+ * players: string[]
+ */
 let rooms = new Map()
+
+/** Players
+ * roomName: string(5)
+ * character: object
+ */
 let players = new Map()
 
 io.on('connection', client => {
@@ -46,10 +57,26 @@ io.on('connection', client => {
     }
     function handleConnectToRoom(roomName){
         client.leave("lobby")
-        client.join(roomName);
-        let map = createMap();
-        client.emit('roomData',rooms.get(roomName),map);
-
+        addPlayerToRoom(roomName,client.id);
+        client.emit('roomData',rooms.get(roomName),createMap());
+    }
+    function addPlayerToRoom(roomName, socketId){
+        let room = rooms.get(roomName)
+        room.players.push(socketId)
+        rooms.set(roomName,room)
+        players.set(socketId,{roomName:roomName,character:{}})
+        client.join("preRoom_" + roomName);
+    }
+    function removePlayerFromRoom(socketId){
+        let roomName = players.get(socketId).roomName;
+        let room = rooms.get(roomName)
+        for (let index = 0; index < room.players.length; index++) {
+            if(room.players[index] == socketId){
+                room.players.splice(index,1);
+                break;
+            }
+        }
+        rooms.set(roomName,room)
     }
     function createMap(){
         let map = {wall: [], gate:[]};
@@ -66,8 +93,16 @@ io.on('connection', client => {
         return map;
     }
     client.on('disconnect',()=>{
-        //disconnect; remove empty room
+        removePlayerFromRoom(client.id);
+        tryRemoveRoom(players.get(client.id).roomName)
     })
+    function tryRemoveRoom(roomName){
+        let room = rooms.get(roomName)
+        if(room.players.length == 0){
+            rooms.delete(roomName)
+            updateRooms()
+        }
+    }
 })
 
 
