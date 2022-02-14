@@ -1,14 +1,21 @@
-const { PORT, GRID_SIZE, CANVAS_SIZE } = require('./constants')
-const {makeId} = require('./utils')
-const http = require('http').createServer();
-const {nMaps} = require('./maps')
-const io = require('socket.io')(http,{
-    cors: {
-        methods: ['GET','POST'],
-    }
+const { PORT, GRID_SIZE, CANVAS_SIZE } = require('./Server/constants')
+const {makeId} = require('./Server/utils')
+const {nMaps} = require('./Server/maps')
+
+const express = require('express');
+const app = express();
+const http = require('http');
+const server = http.createServer(app);
+const { Server } = require('socket.io')
+const io = new Server(server)
+const path = require('path');
+
+app.use(express.static(path.join(__dirname, '/public')))
+app.get('/',(req,res)=>{
+    res.sendFile(__dirname + "/public/Client/index.html");
 })
 
-io.listen(PORT, ()=> {
+server.listen(PORT, ()=> {
     console.log(`Server running on ${PORT}`);
 })
 
@@ -117,11 +124,11 @@ io.on('connection', client => {
     }
     client.on('disconnect',()=>{
         removePlayerFromRoom(client.id);
-        tryRemoveRoom(players.get(client.id).roomName)
+        tryRemoveRoom(players.get(client.id)?.roomName)
     })
     function tryRemoveRoom(roomName){
         let room = rooms.get(roomName)
-        if(room.players.length == 0){
+        if(room?.players.length == 0){
             rooms.delete(roomName)
             updateRooms()
         }

@@ -13,7 +13,6 @@
     "nodemon": "^2.0.7"
   },
   "scripts": {
-    "server": "nodemon -e html,js Server/server.js",
-    "client": "npx live-server Client/"
+    "start":"node server.js"
   }
 }

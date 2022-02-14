@@ -1,3 +1,4 @@
+// var socket = io();
 export const socket = io.connect("http://localhost:3000/")
 import { RenderLoginPage,RenderCreateCharPage, RenderGamePage } from './render.js';
 

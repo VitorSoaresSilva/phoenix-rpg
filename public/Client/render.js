@@ -1,7 +1,7 @@
 import { getFormData, sendCharacter, socket } from "./client.js";
 
 export function RenderLoginPage(data = []) {
-    fetch('./templates/login.mustache')
+    fetch('/Client/templates/login.mustache')
         .then((response) => response.text())
         .then((template) => {
         var rendered = Mustache.render(template,{names:data});
@@ -10,7 +10,7 @@ export function RenderLoginPage(data = []) {
     });
 }
 export function RenderCreateCharPage(data,errors) {
-    fetch('./templates/createChar.mustache')
+    fetch('/Client/templates/createChar.mustache')
         .then((response) => response.text())
         .then((template) => {
         var rendered = Mustache.render(template,{roomName:data,errors: errors});
@@ -19,7 +19,7 @@ export function RenderCreateCharPage(data,errors) {
     });
 }
 export function RenderGamePage() {
-    fetch('./templates/game.mustache')
+    fetch('/Client/templates/game.mustache')
         .then((response) => response.text())
         .then((template) => {
         var rendered = Mustache.render(template);
