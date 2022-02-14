@@ -43,7 +43,6 @@ io.on('connection', client => {
     updateRooms();
     
     function handleNewRoom(){
-        console.log("handle new room")
         const name = makeId(5);
         if(rooms.has(name)){
             handleNewRoom();
@@ -71,15 +70,13 @@ io.on('connection', client => {
     function handleNewPlayer(data){
         let player = players.get(client.id)
         let room = rooms.get(player.roomName)
-        let canUseName = true;
         
         if(!data.name || !data.name.length > 0){
             client.emit('invalidCharacter',room,[{message:'Name invalid'}]);
             return;
         }
         for(let i = 0; i< room.players.length; i++){
-            if(players.get(room.players[i]).character.name == data.name){
-                canUseName = false;
+            if(players.get(room.players[i])?.character.name == data.name){
                 client.emit('invalidCharacter',room,[{message:'Name already in use'}]);
                 return;
             }
@@ -92,7 +89,11 @@ io.on('connection', client => {
         if(!room) return;
         room.players.push(socketId)
         rooms.set(roomName,room)
-        players.set(socketId,{roomName:roomName,character:{}})
+        players.set(socketId,
+            {
+                roomName:roomName,
+                character:{}
+            });
         client.join("preRoom_" + roomName);
     }
     function removePlayerFromRoom(socketId){
@@ -100,13 +101,17 @@ io.on('connection', client => {
         if(!player) return;
         let roomName = player.roomName;
         let room = rooms.get(roomName)
-        for (let index = 0; index < room.players.length; index++) {
-            if(room.players[index] == socketId){
-                room.players.splice(index,1);
-                break;
+        if(room.players.length > 1){
+            for (let index = 0; index < room.players.length; index++) {
+                if(room.players[index] == socketId){
+                    room.players.splice(index,1);
+                    break;
+                }
             }
+        }else{
+            rooms.delete(roomName)
+            updateRooms()
         }
-        rooms.set(roomName,room)
     }
     function createMap(){
         let map = {wall: [], gate:[]};
@@ -124,15 +129,7 @@ io.on('connection', client => {
     }
     client.on('disconnect',()=>{
         removePlayerFromRoom(client.id);
-        tryRemoveRoom(players.get(client.id)?.roomName)
     })
-    function tryRemoveRoom(roomName){
-        let room = rooms.get(roomName)
-        if(room?.players.length == 0){
-            rooms.delete(roomName)
-            updateRooms()
-        }
-    }
 })
 
 
