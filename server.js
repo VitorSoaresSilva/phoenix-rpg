@@ -26,13 +26,13 @@ server.listen(PORT, ()=> {
  * canvasSize: number,
  * players: string[]
  */
-let rooms = new Map()
+let RoomsServer = new Map()
 
 /** Players
  * roomName: string(5)
  * character: object
  */
-let players = new Map()
+let PlayersServer = new Map()
 
 io.on('connection', client => {
     console.log('New Connection!')
@@ -40,11 +40,12 @@ io.on('connection', client => {
     client.emit('init','Hello from server')
     client.on('newRoom',handleNewRoom)
     client.on('newPlayer',handleNewPlayer)
+    client.on('joinRoom',handleJoinRoom)
     updateRooms();
     
     function handleNewRoom(){
         const name = makeId(5);
-        if(rooms.has(name)){
+        if(RoomsServer.has(name)){
             handleNewRoom();
             return;
         }
@@ -54,42 +55,58 @@ io.on('connection', client => {
             canvasSize: CANVAS_SIZE,
             players: []
         };
-        rooms.set(name,newRoom)
+        RoomsServer.set(name,newRoom)
         handleConnectToRoom(name)
         updateRooms()
     }
     function updateRooms(){
-        const allRoomNames = Array.from(rooms.keys())
+        const allRoomNames = Array.from(RoomsServer.keys())
         io.to("lobby").emit('roomNames',allRoomNames)
+    }
+    function updatePlayers(roomName){
+        let room = RoomsServer.get(roomName)
+        if(!room) return;
+        let players = [];
+        room.players.forEach(player =>{
+            players.push(PlayersServer.get(player).character)
+        })
+        io.to("preRoom_" + roomName).emit('updatePlayers',players)
     }
     function handleConnectToRoom(roomName){
         client.leave("lobby")
         addPlayerToRoom(roomName,client.id);
-        client.emit('roomData',rooms.get(roomName));
+        client.emit('roomData',RoomsServer.get(roomName));
     }
     function handleNewPlayer(data){
-        let player = players.get(client.id)
-        let room = rooms.get(player.roomName)
+        let player = PlayersServer.get(client.id)
+        if(!player) return;
+        let room = RoomsServer.get(player.roomName)
         
         if(!data.name || !data.name.length > 0){
             client.emit('invalidCharacter',room,[{message:'Name invalid'}]);
             return;
         }
         for(let i = 0; i< room.players.length; i++){
-            if(players.get(room.players[i])?.character.name == data.name){
+            if(PlayersServer.get(room.players[i])?.character.name == data.name){
                 client.emit('invalidCharacter',room,[{message:'Name already in use'}]);
                 return;
             }
         }
         player.character = {name: data.name}
         client.emit("characterCreated")
+        updatePlayers(room.name)
+    }
+    function handleJoinRoom(roomName){
+        let room = RoomsServer.get(roomName)
+        if(!room)return;
+        handleConnectToRoom(room.name)
     }
     function addPlayerToRoom(roomName, socketId){
-        let room = rooms.get(roomName)
+        let room = RoomsServer.get(roomName)
         if(!room) return;
         room.players.push(socketId)
-        rooms.set(roomName,room)
-        players.set(socketId,
+        RoomsServer.set(roomName,room)
+        PlayersServer.set(socketId,
             {
                 roomName:roomName,
                 character:{}
@@ -97,10 +114,10 @@ io.on('connection', client => {
         client.join("preRoom_" + roomName);
     }
     function removePlayerFromRoom(socketId){
-        let player = players.get(socketId)
+        let player = PlayersServer.get(socketId)
         if(!player) return;
         let roomName = player.roomName;
-        let room = rooms.get(roomName)
+        let room = RoomsServer.get(roomName)
         if(room.players.length > 1){
             for (let index = 0; index < room.players.length; index++) {
                 if(room.players[index] == socketId){
@@ -108,8 +125,9 @@ io.on('connection', client => {
                     break;
                 }
             }
+            updatePlayers(roomName)
         }else{
-            rooms.delete(roomName)
+            RoomsServer.delete(roomName)
             updateRooms()
         }
     }

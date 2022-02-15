@@ -1,6 +1,6 @@
 // var socket = io();
 export const socket = io()
-import { RenderLoginPage,RenderCreateCharPage, RenderGamePage } from './render.js';
+import { RenderLoginPage,RenderCreateCharPage, RenderGamePage, RenderPlayersList } from './render.js';
 
 
 socket.on('init', init)
@@ -8,6 +8,7 @@ socket.on('roomData',handleReceiveRoom)
 socket.on('roomNames',handleReceiveRoomNames)
 socket.on('invalidCharacter',handleReceiveRoom)
 socket.on('characterCreated',handleCharacterCreated)
+socket.on('updatePlayers',handleUpdatePlayers)
 
 function init(message){
     console.log(message)
@@ -22,6 +23,9 @@ function handleReceiveRoomNames(data){
 }
 function handleCharacterCreated(){
     RenderGamePage()
+}
+function handleUpdatePlayers(players){
+    RenderPlayersList(players)
 }
 export function getFormData(e,idForm){
     e.preventDefault();

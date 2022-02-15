@@ -7,6 +7,9 @@ export function RenderLoginPage(data = []) {
         var rendered = Mustache.render(template,{names:data});
         document.getElementById('mainContainer').innerHTML = rendered;    
         document.getElementById('btnNewGame').addEventListener('click',()=>socket.emit('newRoom'))
+        data.forEach(element => {
+            document.getElementById("btnJoin_" + element).addEventListener('click',()=>socket.emit('joinRoom',element))
+        });
     });
 }
 export function RenderCreateCharPage(data,errors) {
@@ -26,4 +29,11 @@ export function RenderGamePage() {
         document.getElementById('mainContainer').innerHTML = rendered;    
     });
 }
-
+export function RenderPlayersList(players) {
+    fetch('/Client/templates/playersList.mustache')
+        .then((response) => response.text())
+        .then((template) => {
+        var rendered = Mustache.render(template,{players:players});
+        document.getElementById('sideContainerRight').innerHTML = rendered;    
+    });
+}
