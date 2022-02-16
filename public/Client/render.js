@@ -21,8 +21,8 @@ export function RenderCreateCharPage(data,errors) {
         document.getElementById('formCreateChar').addEventListener('submit',(e)=>sendCharacter(getFormData(e,"formCreateChar")))
     });
 }
-export function RenderGamePage() {
-    fetch('/Client/templates/game.mustache')
+export function RenderLobbyGamePage() {
+    fetch('/Client/templates/lobbyGame.mustache')
     .then((response) => response.text())
     .then((template) => {
         var rendered = Mustache.render(template);
@@ -36,5 +36,17 @@ export function RenderPlayersList(players) {
         .then((template) => {
         var rendered = Mustache.render(template,{players:players});
         document.getElementById('sideContainerRight').innerHTML = rendered;    
+    });
+}
+
+export function RenderEvenOddGamePage(data) {
+    fetch('/Client/templates/gameEvenOdd.mustache')
+    .then((response) => response.text())
+    .then((template) => {
+        var rendered = Mustache.render(template,{type:data.type});
+        document.getElementById('mainContainer').innerHTML = rendered; 
+        for(let i = 0; i < 10; i++){
+            document.getElementById("btnEvenOdd_" + i).addEventListener('click',()=>socket.emit('evenOdd_choosed_value',i))
+        }   
     });
 }

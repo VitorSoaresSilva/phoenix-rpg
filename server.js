@@ -110,7 +110,8 @@ io.on('connection', client => {
         PlayersServer.set(socketId,
             {
                 roomName:roomName,
-                character:{}
+                character:{},
+                socketId
             });
         client.join("preRoom_" + roomName);
     }
