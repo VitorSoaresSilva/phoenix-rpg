@@ -9,6 +9,7 @@ socket.on('roomNames',handleReceiveRoomNames)
 socket.on('invalidCharacter',handleReceiveRoom)
 socket.on('characterCreated',handleCharacterCreated)
 socket.on('updatePlayers',handleUpdatePlayers)
+socket.on('opponentChosen',handleOpponentChosen)
 
 function init(message){
     console.log(message)
@@ -26,6 +27,9 @@ function handleCharacterCreated(){
 }
 function handleUpdatePlayers(players){
     RenderPlayersList(players)
+}
+function handleOpponentChosen(data){
+    console.log("player chosen",data)
 }
 export function getFormData(e,idForm){
     e.preventDefault();

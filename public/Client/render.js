@@ -23,10 +23,11 @@ export function RenderCreateCharPage(data,errors) {
 }
 export function RenderGamePage() {
     fetch('/Client/templates/game.mustache')
-        .then((response) => response.text())
-        .then((template) => {
+    .then((response) => response.text())
+    .then((template) => {
         var rendered = Mustache.render(template);
         document.getElementById('mainContainer').innerHTML = rendered;    
+        document.getElementById("btnPlayGame").addEventListener('click',()=>socket.emit('startGame'))
     });
 }
 export function RenderPlayersList(players) {

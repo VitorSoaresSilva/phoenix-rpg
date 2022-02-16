@@ -41,6 +41,7 @@ io.on('connection', client => {
     client.on('newRoom',handleNewRoom)
     client.on('newPlayer',handleNewPlayer)
     client.on('joinRoom',handleJoinRoom)
+    require('./Server/evenOddGame')(io,client,RoomsServer,PlayersServer)
     updateRooms();
     
     function handleNewRoom(){
