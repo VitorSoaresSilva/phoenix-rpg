@@ -9,6 +9,8 @@ const server = http.createServer(app);
 const { Server } = require('socket.io')
 const io = new Server(server)
 const path = require('path');
+const { GameStatus } = require('./Server/Enums.js');
+// const Enums = require('./Server/Enums.d.ts');
 
 app.use(express.static(path.join(__dirname, '/public')))
 app.get('/',(req,res)=>{
@@ -54,6 +56,7 @@ io.on('connection', client => {
             name: name,
             gridSize: GRID_SIZE,
             canvasSize: CANVAS_SIZE,
+            status: GameStatus.idle,
             players: []
         };
         RoomsServer.set(name,newRoom)

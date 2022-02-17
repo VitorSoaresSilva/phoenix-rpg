@@ -50,3 +50,12 @@ export function RenderEvenOddGamePage(data) {
         }   
     });
 }
+export function RenderEvenOddSpecPage(data) {
+    console.log(data)
+    fetch('/Client/templates/specEvenOdd.mustache')
+    .then((response) => response.text())
+    .then((template) => {
+        var rendered = Mustache.render(template,{playerOne:data.playersInGame[0],playerTwo: data.playersInGame[1]});
+        document.getElementById('mainContainer').innerHTML = rendered; 
+    });
+}
