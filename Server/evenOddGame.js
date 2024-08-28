@@ -42,19 +42,21 @@ module.exports = function (io,client,RoomsServer,PlayersServer) {
         io.in([playerOne.socketId,playerTwo.socketId]).socketsJoin("game_" + room.name);
         io.in([playerOne.socketId,playerTwo.socketId]).socketsLeave("preRoom_" + room.name);
         let dataToPlayers = {};
-        dataToPlayers[playerOne.socketId] = "odd";
-        dataToPlayers[playerTwo.socketId] = "even";
+        dataToPlayers[playerOne.socketId] = { type: "odd", typeDescription: "ímpar" };
+        dataToPlayers[playerTwo.socketId] = { type: "even", typeDescription: "par"};
         io.to('game_' + room.name).emit('initializeGame',dataToPlayers)
         
         let specData = {
             playersInGame:[
                 {
                     name: playerOne.character.name,
-                    type: "odd"
+                    type: "odd",
+                    typeDescription: "ímpar"
                 },
                 {
                     name: playerTwo.character.name,
-                    type: "even"
+                    type: "even",
+                    typeDescription: "par"
                 }
             ]
         };
@@ -81,6 +83,7 @@ module.exports = function (io,client,RoomsServer,PlayersServer) {
             if(room.game.odd.valueChoosed === null){
                 room.game.odd.valueChoosed = value;
             }else{
+                console.log("cannot change")
                 // emit "cannot change"
                 return;
             }
@@ -88,14 +91,17 @@ module.exports = function (io,client,RoomsServer,PlayersServer) {
             if(room.game.even.valueChoosed === null){
                 room.game.even.valueChoosed = value;
             }else{
+                console.log("cannot change")
                 // emit "cannot change"
                 return;    
             }
         }else{
+            console.log("not a player")
             // not a player
         }
         if(room.game.even.valueChoosed != null && room.game.odd.valueChoosed != null){ 
             let result = (room.game.even.valueChoosed + room.game.odd.valueChoosed) % 2;
+            console.log("someone won: ",result,room.game.odd.player,room.game.even.player)
             if(result === 0){
                 io.to(room.game.even.player).emit("youWon")
                 io.to(room.game.odd.player).emit("youLose")

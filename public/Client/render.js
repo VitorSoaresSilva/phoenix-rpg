@@ -40,10 +40,11 @@ export function RenderPlayersList(players) {
 }
 
 export function RenderEvenOddGamePage(data) {
+    console.log("data",data)
     fetch('/Client/templates/gameEvenOdd.mustache')
     .then((response) => response.text())
     .then((template) => {
-        var rendered = Mustache.render(template,{type:data.type});
+        var rendered = Mustache.render(template,{typeDescription:data.typeDescription});
         document.getElementById('mainContainer').innerHTML = rendered; 
         for(let i = 0; i < 10; i++){
             document.getElementById("btnEvenOdd_" + i).addEventListener('click',()=>socket.emit('evenOdd_choosed_value',i))
@@ -58,4 +59,16 @@ export function RenderEvenOddSpecPage(data) {
         var rendered = Mustache.render(template,{playerOne:data.playersInGame[0],playerTwo: data.playersInGame[1]});
         document.getElementById('mainContainer').innerHTML = rendered; 
     });
+}
+
+export function RenderEvenOddResultPage(data){
+    console.log("Result", data)
+    fetch('/Client/templates/resultEvenOdd.mustache')
+    .then((response) => response.text())
+    .then((template) => {
+        var rendered = Mustache.render(template,{resultado: data.resultado});
+        document.getElementById('mainContainer').innerHTML = rendered; 
+        document.getElementById("btnPlayGame").addEventListener('click',()=>socket.emit('startGame'))
+    })
+
 }

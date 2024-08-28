@@ -1,6 +1,6 @@
 // var socket = io();
 export const socket = io()
-import { RenderLoginPage,RenderCreateCharPage, RenderLobbyGamePage, RenderPlayersList, RenderEvenOddGamePage, RenderEvenOddSpecPage } from './render.js';
+import { RenderLoginPage,RenderCreateCharPage, RenderLobbyGamePage, RenderPlayersList, RenderEvenOddGamePage, RenderEvenOddSpecPage, RenderEvenOddResultPage } from './render.js';
 
 
 socket.on('init', init)
@@ -37,13 +37,15 @@ function handleUpdatePlayers(players){
 }
 function handleInitializeGame(data){
     console.log("player chosen",data)
-    RenderEvenOddGamePage({type: data[socket.id]})
+    RenderEvenOddGamePage(data[socket.id])
 }
 function handleWonGame(){
     console.log("I won!")
+    RenderEvenOddResultPage({resultado: "venceu"});
 }
 function handleLoseGame(){
     console.log("I lose!")
+    RenderEvenOddResultPage({resultado: "perdeu"});
 }
 export function getFormData(e,idForm){
     e.preventDefault();
