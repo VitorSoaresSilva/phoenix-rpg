@@ -58,7 +58,8 @@ module.exports = function (io,client,RoomsServer,PlayersServer) {
                     type: "even",
                     typeDescription: "par"
                 }
-            ]
+            ],
+            result: null
         };
         io.to('preRoom_' + room.name).emit('spec_gameInitialize',specData)
         room.game = {
@@ -102,13 +103,26 @@ module.exports = function (io,client,RoomsServer,PlayersServer) {
         if(room.game.even.valueChoosed != null && room.game.odd.valueChoosed != null){ 
             let result = (room.game.even.valueChoosed + room.game.odd.valueChoosed) % 2;
             console.log("someone won: ",result,room.game.odd.player,room.game.even.player)
+            var winner = {};
+            var loser = {};
             if(result === 0){
                 io.to(room.game.even.player).emit("youWon")
                 io.to(room.game.odd.player).emit("youLose")
+                winner = room.game.even.player.character
+                loser = room.game.odd.player.character
             }else{
                 io.to(room.game.odd.player).emit("youWon")
                 io.to(room.game.even.player).emit("youLose")
+                winner = room.game.odd.player.character
+                loser = room.game.even.player.character
             }
+            let specData = {
+                result: {game: "Par ou impar",winner, loser}
+            };
+            
+            io.in([room.game.even.player,room.game.odd.player]).socketsLeave("game_" + room.name);
+            io.in([room.game.even.player,room.game.odd.player]).socketsJoin("preRoom_" + room.name);
+            io.to('preRoom_' + room.name).emit('openLobby',specData)
         }
     }
 }

@@ -8,3 +8,13 @@
 
 # modo Spec
     remover da sala quem estiver no modo spec caso a sala seja cancelada
+
+
+
+Criação de salas
+Login em salas
+
+Escolha de jogos
+    ao criar um jogo, abrir possibilidade de entrar no jogo
+
+

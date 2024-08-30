@@ -21,13 +21,14 @@ export function RenderCreateCharPage(data,errors) {
         document.getElementById('formCreateChar').addEventListener('submit',(e)=>sendCharacter(getFormData(e,"formCreateChar")))
     });
 }
-export function RenderLobbyGamePage() {
+export function RenderLobbyGamePage(data = {}) {
     fetch('/Client/templates/lobbyGame.mustache')
     .then((response) => response.text())
     .then((template) => {
         var rendered = Mustache.render(template);
         document.getElementById('mainContainer').innerHTML = rendered;    
         document.getElementById("btnPlayGame").addEventListener('click',()=>socket.emit('startGame'))
+        document.getElementById("btnPlayGameRockPaperScissors").addEventListener('click',()=>socket.emit('startRockPaperScissors'))
     });
 }
 export function RenderPlayersList(players) {
@@ -56,7 +57,7 @@ export function RenderEvenOddSpecPage(data) {
     fetch('/Client/templates/specEvenOdd.mustache')
     .then((response) => response.text())
     .then((template) => {
-        var rendered = Mustache.render(template,{playerOne:data.playersInGame[0],playerTwo: data.playersInGame[1]});
+        var rendered = Mustache.render(template,{playerOne:data.playersInGame[0],playerTwo: data.playersInGame[1], result: data.result});
         document.getElementById('mainContainer').innerHTML = rendered; 
     });
 }

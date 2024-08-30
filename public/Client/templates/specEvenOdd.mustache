@@ -8,19 +8,24 @@
         <tr>
             <th>Nome</th>
             <th>Escolha</th>
-            <th>Pronto?</th>
+            {{! <th>Pronto?</th> }}
         </tr>
     </thead>
     <tbody>
         <tr>
             <td>{{playerOne.name}}</td>
             <td>{{playerOne.type}}</td>
-            <td></td>
+            {{! <td></td> }}
         </tr>
         <tr>
             <td>{{playerTwo.name}}</td>
             <td>{{playerTwo.type}}</td>
-            <td></td>
+            {{! <td></td> }}
         </tr>
     </tbody>
 </table>
+{{#result}}
+<p>O resultado é uma vitória para o player: {{result.winner}} e derrota para o player: {{result.loser}}</p>
+
+
+{{/result}}

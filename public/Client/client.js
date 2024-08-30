@@ -3,21 +3,27 @@ export const socket = io()
 import { RenderLoginPage,RenderCreateCharPage, RenderLobbyGamePage, RenderPlayersList, RenderEvenOddGamePage, RenderEvenOddSpecPage, RenderEvenOddResultPage } from './render.js';
 
 
-socket.on('init', init)
-socket.on('roomData',handleReceiveRoom)
-socket.on('roomNames',handleReceiveRoomNames)
-socket.on('invalidCharacter',handleReceiveRoom)
-socket.on('characterCreated',handleCharacterCreated)
-socket.on('updatePlayers',handleUpdatePlayers)
-socket.on('initializeGame',handleInitializeGame)
-socket.on('spec_gameInitialize',handleSpecGameInitialize)
-socket.on('youWon',handleWonGame)
-socket.on('youLose',handleLoseGame)
-
-function init(message){
-    console.log(message)
-    RenderLoginPage()
+const eventhandlers = {
+    // "init" : init,
+    "roomData" : handleReceiveRoom,
+    "roomNames" : handleReceiveRoomNames,
+    "invalidCharacter" : handleReceiveRoom,
+    "openLobby" : handleLobby,
+    "updatePlayers" : handleUpdatePlayers,
+    "initializeGame" : handleInitializeGame,
+    "spec_gameInitialize" : handleSpecGameInitialize,
+    "youWon" : handleWonGame,
+    "youLose" : handleLoseGame,
 }
+
+for(const eventHandler in eventhandlers){
+    socket.on(eventHandler, eventhandlers[eventHandler])
+}
+
+// function init(message){
+//     console.log(message)
+//     RenderLoginPage()
+// }
 function handleReceiveRoom(data,errors = []){
     RenderCreateCharPage(data.name,errors)
 }
@@ -25,8 +31,8 @@ function handleReceiveRoomNames(data){
     console.log(data)
     RenderLoginPage(data)
 }
-function handleCharacterCreated(){
-    RenderLobbyGamePage()
+function handleLobby(data){
+    RenderLobbyGamePage(data)
 }
 function handleSpecGameInitialize(data){
     console.log(data)
